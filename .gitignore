@@ -1,0 +1,30 @@
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+dynamic_key.py
+# Virtual environments
+venv/
+.env/
+.env.bak/
+.venv/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Reports and generated files
+*.json
+*.html
+
+# Logs and temporary data
+*.log
+tmp/
+cache/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
