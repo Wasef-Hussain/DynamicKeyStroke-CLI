@@ -1,21 +1,5 @@
 #!/usr/bin/env python3
-"""
-DynamicKey — Privacy-First Keystroke Dynamics CLI
 
-This tool measures keystroke dynamics — the time intervals between key presses —
-to generate local JSON and HTML reports. It’s ethical, privacy-respecting,
-and does not require any backend server.
-
-Features:
-- Capture keystroke timing data for a prompted phrase (multiple rounds)
-- Store only anonymized key identifiers (SHA256 with ephemeral salt)
-- Compute per-round and aggregate statistics (inter-key intervals, key hold times)
-- Export detailed JSON and HTML reports
-- Optionally send summarized results to a Discord webhook (no raw key data)
-
-Usage Example:
-  python cli.py --phrase "the quick brown fox" --rounds 5
-"""
 
 import argparse
 import datetime
@@ -226,15 +210,52 @@ def send_discord_summary(webhook_url, report):
     else:
         print("✅ Summary sent to Discord successfully.")
 
+def get_user_input():
+    """
+    Ask the user for the typing phrase and number of rounds interactively.
+    Returns:
+        phrase (str): The phrase the user will type
+        rounds (int): Number of rounds to record
+    """
+    print("=== DynamicKey Setup ===")
+    
+    # Ask for phrase
+    phrase = input("Enter the phrase you want to type: ").strip()
+    while not phrase:
+        print("Phrase cannot be empty.")
+        phrase = input("Enter the phrase you want to type: ").strip()
+    
+    # Ask for number of rounds
+    while True:
+        rounds_input = input("Enter number of rounds to record (default 3): ").strip()
+        if not rounds_input:
+            rounds = 3
+            break
+        if rounds_input.isdigit() and int(rounds_input) > 0:
+            rounds = int(rounds_input)
+            break
+        print("Please enter a valid positive integer.")
+    
+    print(f"\n✅ Phrase set to: '{phrase}'")
+    print(f"✅ Rounds set to: {rounds}\n")
+    return phrase, rounds
+
+
 def main():
     parser = argparse.ArgumentParser(description="DynamicKey — Privacy-First Keystroke Dynamics CLI")
-    parser.add_argument("--phrase", default="the quick brown fox", help="Phrase to type")
-    parser.add_argument("--rounds", type=int, default=3, help="Number of rounds")
+    parser.add_argument("--phrase", default=None, help="Phrase to type (if not provided, will ask)")
+    parser.add_argument("--rounds", type=int, default=None, help="Number of rounds (if not provided, will ask)")
     parser.add_argument("--out-json", default="keystroke_report.json")
     parser.add_argument("--out-html", default="keystroke_report.html")
     parser.add_argument("--discord-webhook", default=None)
     parser.add_argument("--store-chars", action="store_true")
     args = parser.parse_args()
+    if not args.phrase or not args.rounds:
+        phrase, rounds = get_user_input()
+        if not args.phrase:
+            args.phrase = phrase
+        if not args.rounds:
+            args.rounds = rounds
 
     anonymize = not args.store_chars
     if not anonymize:
